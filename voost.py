@@ -1,5 +1,13 @@
 import subprocess
+import shutil
 from pathlib import Path
+
+def check_ffmpeg():
+    if shutil.which("ffmpeg") is None:
+        print("Error: ffmpeg not found. Please install ffmpeg and ensure it is on your PATH.")
+        return False
+    print("ffmpeg found.")
+    return True
 
 def process_audio_with_subharmonics(input_file, output_file):
     # [0:a] is the input
@@ -31,6 +39,9 @@ def process_audio_with_subharmonics(input_file, output_file):
 # Example setup for parallel execution
 from concurrent.futures import ProcessPoolExecutor
 
+if not check_ffmpeg():
+    raise SystemExit(1)
+
 input_dir = Path("./raw_recordings")
 output_dir = Path("./processed_recordings")
 output_dir.mkdir(exist_ok=True)
@@ -39,4 +50,5 @@ files = list(input_dir.glob("*.wav"))
 
 with ProcessPoolExecutor() as executor:
     for file in files:
+        print(f"Submitting: {file.name}")
         executor.submit(process_audio_with_subharmonics, file, output_dir / file.name)
